@@ -1,4 +1,5 @@
 import boto3
+import botocore
 import  sys
 import click
 session = boto3.Session(profile_name = 'shotty')
@@ -46,6 +47,7 @@ def list_volumes(project):
 def snapshots():
 	"""Commands for volumes"""
 	pass
+
 @snapshots.command('list')
 @click.option('--project',default=None,help='Only snapshots for project (tag Project:<name>)')
 def list_volumes(project):
@@ -108,7 +110,11 @@ def stop_instances(project):
 
 	for i in instances:
 		print("Stopping {0}...".format(i.id))
-		i.stop()
+		try:
+			i.stop()
+		except botocore.exceptions.ClientError as e:
+			print("Can't stop {0} due to ".format(i.id),str(e))
+			continue
 	return
 
 @instances.command('start')
@@ -119,7 +125,11 @@ def start_instances(project):
 
 	for i in instances:
 		print("Starting {0}...".format(i.id))
-		i.start()
+		try:
+			i.start()
+		except botocore.exceptions.ClientError as e:
+			print("Can't start {0} due to ".format(i.id),str(e))
+			continue
 	return
 
 if __name__ =='__main__':
